@@ -140,6 +140,51 @@ export function countItems(node) {
   return count;
 }
 
+// ── Sort tree nodes ────────────────────────────────────────
+function sortNodes(children, sortMode) {
+  if (!children || children.length === 0) return children;
+  
+  const sorted = [...children];
+  
+  switch (sortMode) {
+    case 'name-asc':
+      sorted.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+      break;
+    
+    case 'name-desc':
+      sorted.sort((a, b) => b.name.localeCompare(a.name, undefined, { sensitivity: 'base' }));
+      break;
+    
+    case 'type-folders-first':
+      sorted.sort((a, b) => {
+        if (a.type === 'folder' && b.type !== 'folder') return -1;
+        if (a.type !== 'folder' && b.type === 'folder') return 1;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+      });
+      break;
+    
+    case 'none':
+    default:
+      // Keep original order
+      return children;
+  }
+  
+  return sorted;
+}
+
+export function sortTree(node, sortMode) {
+  if (!node || sortMode === 'none') return node;
+  
+  const copy = { ...node };
+  if (copy.children && copy.children.length > 0) {
+    copy.children = sortNodes(copy.children, sortMode).map(child => 
+      sortTree(child, sortMode)
+    );
+  }
+  
+  return copy;
+}
+
 // ── Tree → text ────────────────────────────────────────────
 export function treeToText(node, prefix = '', isLast = true, isRoot = true) {
   if (!node) return '';

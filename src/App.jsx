@@ -14,6 +14,7 @@ import {
   parseGithubUrl,
   filterDepth,
   countItems,
+  sortTree,
 } from './utils';
 
 export default function App() {
@@ -31,6 +32,7 @@ export default function App() {
   const [showIcons, setShowIcons] = useState(true);
   const [iconsOpen, setIconsOpen] = useState(false);
   const [userIcons, setUserIcons] = useState({ ...FILE_ICONS });
+  const [sortMode, setSortMode] = useState('none');
 
   // ── Tree state ──────────────────────────────────────────
   const [treeData, setTreeData] = useState(null);
@@ -52,9 +54,12 @@ export default function App() {
   const treeRef = useRef(null);
 
   // ── Recompute filtered tree ─────────────────────────────
-  const applyFilter = useCallback((data, mode, depth) => {
+  const applyFilter = useCallback((data, mode, depth, sort = 'none') => {
     if (!data) return;
-    const filtered = filterDepth(data, mode, depth);
+    let filtered = filterDepth(data, mode, depth);
+    if (sort !== 'none') {
+      filtered = sortTree(filtered, sort);
+    }
     setFilteredTree(filtered);
     setItemCount(countItems(filtered));
   }, []);
@@ -86,7 +91,7 @@ export default function App() {
       if (!parsed) { showToast('⚠️', 'Could not parse input'); return; }
 
       setTreeData(parsed);
-      applyFilter(parsed, depthMode, customDepth);
+      applyFilter(parsed, depthMode, customDepth, sortMode);
     } catch (e) {
       setGithubStatus({ type: 'error', message: '✗ ' + e.message });
       showToast('⚠️', e.message);
@@ -98,12 +103,17 @@ export default function App() {
   // ── Re-filter when depth changes (if tree already loaded) ─
   function handleDepthChange(mode) {
     setDepthMode(mode);
-    if (treeData) applyFilter(treeData, mode, customDepth);
+    if (treeData) applyFilter(treeData, mode, customDepth, sortMode);
   }
 
   function handleCustomDepthChange(val) {
     setCustomDepth(val);
-    if (treeData && depthMode === 'custom') applyFilter(treeData, 'custom', val);
+    if (treeData && depthMode === 'custom') applyFilter(treeData, 'custom', val, sortMode);
+  }
+
+  function handleSortChange(mode) {
+    setSortMode(mode);
+    if (treeData) applyFilter(treeData, depthMode, customDepth, mode);
   }
 
   function handleIconsChange(val) {
@@ -209,6 +219,7 @@ export default function App() {
           showIcons={showIcons} setShowIcons={handleIconsChange}
           iconsOpen={iconsOpen} setIconsOpen={setIconsOpen}
           userIcons={userIcons} setUserIcons={setUserIcons}
+          sortMode={sortMode} setSortMode={handleSortChange}
         />
 
         {/* Generate button row */}

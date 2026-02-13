@@ -133,10 +133,14 @@ export function Toggle({ checked, onChange, label }) {
           type="checkbox"
           checked={checked}
           onChange={onChange}
-          style={{ opacity: 0, width: 0, height: 0, position: 'absolute' }}
+          style={{ opacity: 0, width: 0, height: 0, position: 'absolute', pointerEvents: 'none' }}
         />
         <div
-          onClick={() => onChange({ target: { checked: !checked } })}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onChange({ target: { checked: !checked } });
+          }}
           style={{
             position: 'absolute', inset: 0,
             background: checked ? 'var(--accent)' : 'var(--border-light)',

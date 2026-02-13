@@ -9,12 +9,20 @@ const DEPTH_OPTIONS = [
   { value: 'custom', label: '# Custom' },
 ];
 
+const SORT_OPTIONS = [
+  { value: 'none', label: 'None' },
+  { value: 'type-folders-first', label: 'Folders first' },
+  { value: 'name-asc', label: 'Name (A-Z)' },
+  { value: 'name-desc', label: 'Name (Z-A)' },
+];
+
 export default function ConfigPanel({
   depthMode, setDepthMode,
   customDepth, setCustomDepth,
   showIcons, setShowIcons,
   iconsOpen, setIconsOpen,
   userIcons, setUserIcons,
+  sortMode, setSortMode,
 }) {
   return (
     <Panel>
@@ -84,6 +92,42 @@ export default function ConfigPanel({
           />
         )}
 
+        {/* Sort label */}
+        <span style={{
+          fontSize: 12,
+          color: 'var(--text-secondary)',
+          fontFamily: 'var(--font-mono)',
+          whiteSpace: 'nowrap',
+          marginLeft: 'auto',
+        }}>
+          Sort:
+        </span>
+
+        {/* Sort dropdown */}
+        <select
+          value={sortMode}
+          onChange={e => setSortMode(e.target.value)}
+          style={{
+            padding: '5px 10px',
+            borderRadius: 'var(--radius-sm)',
+            fontSize: 12,
+            fontFamily: 'var(--font-mono)',
+            fontWeight: 500,
+            cursor: 'pointer',
+            border: '1px solid var(--border)',
+            background: 'var(--bg)',
+            color: 'var(--text-primary)',
+            outline: 'none',
+            minWidth: 140,
+          }}
+        >
+          {SORT_OPTIONS.map(opt => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+        </select>
+
         <div style={{ flex: 1 }} />
 
         {/* File icons toggle */}
@@ -96,7 +140,7 @@ export default function ConfigPanel({
         {/* Edit icons button — only when icons enabled */}
         {showIcons && (
           <Btn
-            onClick={() => setIconsOpen(o => !o)}
+            onClick={() => setIconsOpen(!iconsOpen)}
             style={{ fontSize: 12, padding: '6px 14px' }}
           >
             {iconsOpen ? '▲ Hide icons' : '✏️ Edit icons'}
